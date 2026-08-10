@@ -87,11 +87,11 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
 
     // ── Theme palette ──
     const T = {
-      h1: "#1e3a8a", h2: "#0369a1", h3: "#0369a1", h4: "#1f2937",
-      body: "#374151", strong: "#111827", muted: "#6b7280",
+      h1: "#1a2e6b", h2: "#005a8a", h3: "#005a8a", h4: "#111827",
+      body: "#1a1a1a", strong: "#000000", muted: "#4b5563",
       codeBg: "#eef2f7", codeText: "#9f1239", codeBdr: "#d1d5db",
-      bqBg: "#f0f7ff", bqBdr: "#1e3a8a", tblHdr: "#1e3a8a",
-      link: "#1e3a8a", border: "#e5e7eb",
+      bqBg: "#f0f7ff", bqBdr: "#1a2e6b", tblHdr: "#1a2e6b",
+      link: "#1a2e6b", border: "#e5e7eb",
     };
 
     // ── Clone the preview DOM ──
@@ -147,6 +147,21 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
       // fade-in animation state, an inherited "muted" class, anything),
       // a static exported PDF should never show washed-out "ghost" text.
       el.style.setProperty("opacity", "1", "important");
+    });
+
+    // ── Prevent page-break text clipping ──
+    // html2pdf can slice an element mid-line at page boundaries, causing
+    // clipped text at the bottom of one page and duplicated/clipped text
+    // at the top of the next. Setting break-inside:avoid on block elements
+    // tells html2pdf to push the whole block to the next page instead.
+    clone.querySelectorAll("p, li, blockquote, h1, h2, h3, h4, h5, h6, .code-block-wrapper, .table-wrapper, .flowchart-wrapper").forEach(el => {
+      el.style.breakInside = "avoid";
+      el.style.pageBreakInside = "avoid"; // legacy fallback
+    });
+    // Keep headings attached to the content that follows them
+    clone.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(el => {
+      el.style.breakAfter = "avoid";
+      el.style.pageBreakAfter = "avoid";
     });
 
     // ════════════════════════════════════
@@ -254,39 +269,156 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
       el.style.cssText = `background:${T.codeBg};color:${T.codeText};border:1px solid ${T.codeBdr};border-radius:4px;padding:1px 5px;font-family:"Fira Code","Consolas",monospace;font-size:0.82em;font-weight:400;display:inline;white-space:nowrap;overflow:visible`;
     });
 
-    // Code blocks — keep dark theme
+    // ── Code blocks — light theme for study notes ──────────────────────────
+    // A dark block on a white page is jarring when printed / reading as a PDF.
+    // GitHub Light palette: soft off-white background, muted professional
+    // syntax colors that read clearly both on screen and on paper.
+
     clone.querySelectorAll(".code-block-wrapper").forEach(el => {
-      el.style.cssText = "overflow:hidden;border-radius:8px;max-width:100%;border:1px solid #3a3a4a;margin:14px 0;background:#1e1e2e;box-shadow:none;transform:none";
+      el.style.cssText = [
+        "overflow:hidden",
+        "border-radius:8px",
+        "max-width:100%",
+        "border:1.5px solid #d0d7de",
+        "margin:14px 0",
+        "background:#f6f8fa",
+        "box-shadow:0 1px 3px rgba(0,0,0,0.07)",
+        "transform:none",
+      ].join(";");
     });
+
+    // Header bar — slightly darker than the body, clean separator
     clone.querySelectorAll(".code-block-header").forEach(el => {
-      el.style.borderRadius = "0";
+      el.style.cssText = [
+        "display:flex",
+        "align-items:center",
+        "justify-content:space-between",
+        "padding:5px 14px",
+        "background:#eaeef2",
+        "border-bottom:1px solid #d0d7de",
+        "border-radius:0",
+      ].join(";");
     });
+
+    // Language badge pill instead of plain text
+    clone.querySelectorAll(".code-block-lang").forEach(el => {
+      el.style.cssText = [
+        "font-size:10px",
+        "color:#57606a",
+        "background:#dde1e6",
+        "border-radius:20px",
+        "padding:1px 8px",
+        "text-transform:uppercase",
+        "letter-spacing:0.5px",
+        "font-weight:700",
+        "font-family:\"Inter\",sans-serif",
+      ].join(";");
+    });
+
+    // Mac dots — keep them as a visual cue (neutral colors for print)
+    clone.querySelectorAll(".code-window-controls").forEach(el => {
+      el.style.cssText = "display:flex;gap:5px;align-items:center";
+    });
+    clone.querySelectorAll(".mac-dot").forEach(el => {
+      el.style.cssText = "width:8px;height:8px;border-radius:50%;display:inline-block";
+    });
+    clone.querySelectorAll(".mac-close").forEach(el => { el.style.background = "#f78166"; });
+    clone.querySelectorAll(".mac-minimize").forEach(el => { el.style.background = "#d4a72c"; });
+    clone.querySelectorAll(".mac-maximize").forEach(el => { el.style.background = "#57ab5a"; });
+
     // Hide copy button (useless on paper)
     clone.querySelectorAll(".code-copy-btn").forEach(el => el.style.display = "none");
-    // Code text wrapping — only target block-level code elements, NOT inline
-    // code. Using the broad "code" tag selector here previously applied
-    // overflow:hidden to .inline-code elements too, clipping surrounding
-    // list-item / paragraph text in the PDF.
+
+    // Code content — wrapping + compact mono sizing
     clone.querySelectorAll("pre,.code-block,.code-block > div,.code-block-wrapper code").forEach(el => {
       el.style.whiteSpace = "pre-wrap";
       el.style.wordBreak = "break-word";
       el.style.overflowWrap = "break-word";
       el.style.overflow = "hidden";
       el.style.maxWidth = "100%";
+      el.style.fontSize = "11.5px";
+      el.style.lineHeight = "1.5";
+      el.style.fontFamily = '"Fira Code","Consolas","Monaco",monospace';
     });
-    // The syntax highlighter's own box (.code-block, and its inner wrapper
-    // div) doesn't reliably fill the full width/height of .code-block-wrapper
-    // once captured — measured directly from a rendered PDF, it left a wide
-    // strip on the right and a gap below the last line, both showing the
-    // wrapper's #1e1e2e instead of the code's own background. The app's CSS
-    // already tries to make .code-block transparent (!important) so the
-    // wrapper's color shows through seamlessly either way, but that override
-    // wasn't surviving the html2canvas capture. Force matching values with
-    // maximum specificity so there's no gap left to show regardless of why.
+
+    // Padding on the code content area
+    clone.querySelectorAll(".code-block").forEach(el => {
+      el.style.setProperty("padding", "12px 16px", "important");
+      el.style.setProperty("margin", "0", "important");
+    });
+
+    // Ensure the inner containers fill 100% width
     clone.querySelectorAll(".code-block,.code-block > div").forEach(el => {
       el.style.setProperty("width", "100%", "important");
       el.style.setProperty("box-sizing", "border-box", "important");
-      el.style.setProperty("background", "#1e1e2e", "important");
+    });
+
+    // ── Remap syntax-highlighter token colors to a light theme ──────────────
+    //
+    // WHY COLOR-VALUE MAPPING?
+    // react-syntax-highlighter with `useInlineStyles: true` (the default)
+    // **strips** the token-type CSS classes (keyword, string, etc.) from the
+    // rendered spans — only "token" is kept. Colors are applied exclusively
+    // via inline `style`. So we cannot use classList to identify token types.
+    //
+    // Instead we:
+    //   1. Read each span's current inline `color` (an RGB string set by oneDark)
+    //   2. Normalize it to "r,g,b" for reliable lookup
+    //   3. Map it to the corresponding GitHub-Light color
+
+    // Convert any CSS color string to a normalised "r,g,b" key.
+    // Handles both "rgb(r, g, b)" and "hsl(…)" forms (the browser usually
+    // stores the computed value as rgb, but we handle hsl just in case).
+    function colorToRGBKey(c) {
+      if (!c) return null;
+      c = c.trim();
+      const rgb = c.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+      if (rgb) return `${rgb[1]},${rgb[2]},${rgb[3]}`;
+      return null; // can't parse — leave as default
+    }
+
+    // oneDark HSL values → browser RGB → light-theme hex.
+    // Generated by converting each HSL from the oneDark theme to RGB:
+    //   hsl(286,60%,67%) → rgb(198,120,221) — keyword
+    //   hsl(95,38%,62%)  → rgb(152,195,121) — string / builtin / char / regex
+    //   hsl(207,82%,66%) → rgb(97,175,239)  — function / variable / operator
+    //   hsl(29,54%,61%)  → rgb(209,154,102) — number / class-name / boolean
+    //   hsl(355,65%,65%) → rgb(224,108,117) — property / tag / symbol / deleted
+    //   hsl(220,10%,40%) → rgb(92,99,112)   — comment
+    //   hsl(220,14%,71%) → rgb(171,178,191) — default text / punctuation / entity
+    //   hsl(187,47%,55%) → rgb(86,182,194)  — url
+    //   hsl(5,48%,51%)   → rgb(190,80,70)   — interpolation-punctuation
+    const DARK_TO_LIGHT = {
+      "198,120,221": { color: "#0550ae" },                 // keyword → navy
+      "152,195,121": { color: "#116329" },                 // string/builtin → forest green
+      "97,175,239":  { color: "#8250df" },                 // function/variable → purple
+      "209,154,102": { color: "#953800" },                 // number/class-name → rust
+      "224,108,117": { color: "#cf222e" },                 // property/tag → crimson
+      "92,99,112":   { color: "#6e7781", italic: true },   // comment → muted slate
+      "171,178,191": { color: "#24292f" },                 // default/punctuation → near-black
+      "86,182,194":  { color: "#0550ae" },                 // url → navy
+      "190,80,70":   { color: "#cf222e" },                 // interpolation → crimson
+    };
+
+    clone.querySelectorAll(".code-block-wrapper span").forEach(el => {
+      const key = colorToRGBKey(el.style.color);
+      const mapping = key && DARK_TO_LIGHT[key];
+      if (mapping) {
+        el.style.color = mapping.color;
+        if (mapping.italic) el.style.fontStyle = "italic";
+      } else {
+        // Unmapped or no inline color → default near-black
+        el.style.color = "#24292f";
+      }
+      // Remove dark text-shadow from oneDark
+      el.style.textShadow = "none";
+    });
+
+    // Background of all internal wrapper divs → transparent so the
+    // wrapper's #f6f8fa shows through with no double-box artifact.
+    clone.querySelectorAll(".code-block, .code-block > div, .code-block code, .code-block pre").forEach(el => {
+      el.style.setProperty("background", "transparent", "important");
+      el.style.textShadow = "none";
     });
 
     // Blockquotes
@@ -372,9 +504,9 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
         .set({
           margin: [10, 10, 10, 10], // top, right, bottom, left (mm)
           filename: `${pdfTitle}.pdf`,
-          image: { type: "png" },
+          image: { type: "jpeg", quality: 1 },
           html2canvas: {
-            scale: 3,
+            scale: 4,
             useCORS: true,
             letterRendering: true,
             logging: false,
@@ -385,7 +517,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
             backgroundColor: "#ffffff",
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-          pagebreak: { mode: ["css", "legacy"] },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
         })
         .from(clone)
         .toPdf()
