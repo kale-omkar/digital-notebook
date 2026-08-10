@@ -1,6 +1,137 @@
 import { useRef, useEffect, useCallback, useMemo } from "react";
 import "./Editor.css";
 
+/* ─── Inline SVG Icons ─── */
+const icons = {
+  bold: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+      <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+    </svg>
+  ),
+  italic: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="4" x2="10" y2="4" />
+      <line x1="14" y1="20" x2="5" y2="20" />
+      <line x1="15" y1="4" x2="9" y2="20" />
+    </svg>
+  ),
+  strikethrough: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 4H9a3 3 0 0 0-3 3c0 2 1.5 3 4 3.5" />
+      <path d="M8 20h7a3 3 0 0 0 3-3c0-2-1.5-3-4-3.5" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+    </svg>
+  ),
+  code: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  ),
+  codeBlock: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <polyline points="9 8 5 12 9 16" />
+      <polyline points="15 8 19 12 15 16" />
+    </svg>
+  ),
+  link: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  ),
+  image: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  ),
+  list: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <circle cx="4" cy="6" r="1" fill="currentColor" />
+      <circle cx="4" cy="12" r="1" fill="currentColor" />
+      <circle cx="4" cy="18" r="1" fill="currentColor" />
+    </svg>
+  ),
+  orderedList: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="10" y1="6" x2="21" y2="6" />
+      <line x1="10" y1="12" x2="21" y2="12" />
+      <line x1="10" y1="18" x2="21" y2="18" />
+      <text x="2" y="8" fontSize="8" fill="currentColor" stroke="none" fontWeight="700">1</text>
+      <text x="2" y="14" fontSize="8" fill="currentColor" stroke="none" fontWeight="700">2</text>
+      <text x="2" y="20" fontSize="8" fill="currentColor" stroke="none" fontWeight="700">3</text>
+    </svg>
+  ),
+  task: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="14" height="14" rx="2" />
+      <path d="M7 12l2 2 4-4" />
+    </svg>
+  ),
+  quote: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10 8c-1.1 0-2 .9-2 2v4h4v-4H9.5c0-1.7 1.3-3 3-3V5.5C9.7 5.5 7.5 7.2 7.5 10v6h5V10h-2.5zm8 0c-1.1 0-2 .9-2 2v4h4v-4h-2.5c0-1.7 1.3-3 3-3V5.5c-2.8 0-5 1.7-5 4.5v6h5V10H18z" />
+    </svg>
+  ),
+  table: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="3" y1="15" x2="21" y2="15" />
+      <line x1="9" y1="3" x2="9" y2="21" />
+      <line x1="15" y1="3" x2="15" y2="21" />
+    </svg>
+  ),
+  hr: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <circle cx="8" cy="12" r="1" fill="currentColor" />
+      <circle cx="16" cy="12" r="1" fill="currentColor" />
+    </svg>
+  ),
+  sun: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ),
+  moon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
+  expand: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" y1="3" x2="14" y2="10" />
+      <line x1="3" y1="21" x2="10" y2="14" />
+    </svg>
+  ),
+  collapse: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4 14 10 14 10 20" />
+      <polyline points="20 10 14 10 14 4" />
+      <line x1="14" y1="10" x2="21" y2="3" />
+      <line x1="3" y1="21" x2="10" y2="14" />
+    </svg>
+  ),
+};
+
 function Editor({
   content,
   onChange,
@@ -12,7 +143,15 @@ function Editor({
 }) {
   const textareaRef = useRef(null);
   const contentRef = useRef(content);
-  contentRef.current = content;
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const insertAtCursor = useCallback(
     (before, after = "", placeholder = "") => {
@@ -233,7 +372,7 @@ function Editor({
     }, 0);
   }, [onChange]);
 
-  // Keyboard shortcuts — stable handler via refs
+  // Keyboard shortcuts — uses refs to avoid stale closures
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -280,7 +419,7 @@ function Editor({
               currentContent.substring(0, lineStart) +
               lineText.substring(removed) +
               currentContent.substring(end);
-            onChange(newText);
+            onChangeRef.current(newText);
             setTimeout(() => {
               const newPos = Math.max(lineStart, start - removed);
               textarea.setSelectionRange(newPos, newPos);
@@ -292,7 +431,7 @@ function Editor({
             currentContent.substring(0, lineStart) +
             "  " +
             currentContent.substring(lineStart);
-          onChange(newText);
+          onChangeRef.current(newText);
           setTimeout(() => {
             textarea.setSelectionRange(start + 2, start + 2);
           }, 0);
@@ -302,7 +441,7 @@ function Editor({
 
     textarea.addEventListener("keydown", handleKeyDown);
     return () => textarea.removeEventListener("keydown", handleKeyDown);
-  }, [insertBold, insertItalic, insertLink, insertInlineCode, onChange]);
+  }, [insertBold, insertItalic, insertLink, insertInlineCode]);
 
   const stats = useMemo(() => {
     if (!content) return { words: 0, chars: 0 };
@@ -316,24 +455,32 @@ function Editor({
       style={style}
     >
       <div className="editor-header">
-        <span className="editor-title">Editor</span>
+        <div className="editor-header-left">
+          <div className="editor-title-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </div>
+          <span className="editor-title">Editor</span>
+        </div>
         <div className="editor-header-right">
           <span className="editor-stats">
             {stats.words} words · {stats.chars} chars
           </span>
           <button
-            className="theme-toggle-btn"
+            className="header-icon-btn theme-toggle-btn"
             onClick={onToggleDarkMode}
             title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {darkMode ? "Light" : "Dark"}
+            {darkMode ? icons.sun : icons.moon}
           </button>
           <button
-            className="expand-btn"
+            className="header-icon-btn expand-btn"
             onClick={onToggleExpand}
             title={expanded ? "Exit fullscreen" : "Fullscreen editor"}
           >
-            {expanded ? "Collapse" : "Expand"}
+            {expanded ? icons.collapse : icons.expand}
           </button>
         </div>
       </div>
@@ -368,21 +515,21 @@ function Editor({
             onClick={insertBold}
             title="Bold (Ctrl+B)"
           >
-            <strong>B</strong>
+            {icons.bold}
           </button>
           <button
             className="toolbar-btn"
             onClick={insertItalic}
             title="Italic (Ctrl+I)"
           >
-            <em>I</em>
+            {icons.italic}
           </button>
           <button
             className="toolbar-btn"
             onClick={insertStrikethrough}
             title="Strikethrough"
           >
-            <s>S</s>
+            {icons.strikethrough}
           </button>
         </div>
         <div className="toolbar-divider" />
@@ -392,7 +539,7 @@ function Editor({
             onClick={insertInlineCode}
             title="Inline Code (Ctrl+`)"
           >
-            &lt;/&gt;
+            {icons.code}
           </button>
           <CodeBlockDropdown onInsert={insertCodeBlock} />
           <button
@@ -400,10 +547,10 @@ function Editor({
             onClick={insertLink}
             title="Link (Ctrl+K)"
           >
-            Link
+            {icons.link}
           </button>
           <button className="toolbar-btn" onClick={insertImage} title="Image">
-            Img
+            {icons.image}
           </button>
         </div>
         <div className="toolbar-divider" />
@@ -413,38 +560,38 @@ function Editor({
             onClick={() => insertList(false)}
             title="Bullet List"
           >
-            List
+            {icons.list}
           </button>
           <button
             className="toolbar-btn"
             onClick={() => insertList(true)}
             title="Numbered List"
           >
-            1.
+            {icons.orderedList}
           </button>
           <button
             className="toolbar-btn"
             onClick={insertTaskList}
             title="Task List (checkboxes)"
           >
-            Task
+            {icons.task}
           </button>
           <button
             className="toolbar-btn"
             onClick={insertBlockquote}
             title="Blockquote"
           >
-            Quote
+            {icons.quote}
           </button>
           <button className="toolbar-btn" onClick={insertTable} title="Table">
-            Table
+            {icons.table}
           </button>
           <button
             className="toolbar-btn"
             onClick={insertHr}
             title="Horizontal Rule"
           >
-            HR
+            {icons.hr}
           </button>
         </div>
       </div>
@@ -512,7 +659,7 @@ function CodeBlockDropdown({ onInsert }) {
   return (
     <details className="code-dropdown" ref={detailsRef}>
       <summary className="toolbar-btn" title="Code Block (choose language)">
-        {"{ }"}
+        {icons.codeBlock}
       </summary>
       <div className="code-dropdown-menu">
         {LANGUAGES.map((lang) => (

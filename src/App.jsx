@@ -109,6 +109,7 @@ function App() {
                 content={content}
                 expanded={expandedPanel === "preview"}
                 onToggleExpand={() => toggleExpand("preview")}
+                darkMode={darkMode}
                 style={
                   showBothPanels
                     ? { flex: `0 0 ${100 - splitPercent}%` }

@@ -11,132 +11,181 @@
   flex: 1 1 100%;
 }
 
+/* ─── Header ─── */
 .editor-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background-color: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Accent gradient line under header */
+.editor-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--header-gradient);
+  opacity: 0.6;
+}
+
+.editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-title-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color);
+  opacity: 0.8;
 }
 
 .editor-title {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .editor-header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .editor-stats {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
+  font-weight: 500;
+  padding: 3px 10px;
+  background-color: var(--bg-hover);
+  border-radius: 12px;
+  letter-spacing: 0.2px;
 }
 
-.expand-btn {
-  padding: 4px 10px;
+/* ─── Header Icon Buttons ─── */
+.header-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   background-color: var(--bg-secondary);
   color: var(--text-muted);
-  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.expand-btn:hover {
+.header-icon-btn:hover {
   border-color: var(--accent-color);
   color: var(--accent-color);
+  background-color: var(--accent-glow);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--shadow-light);
 }
 
-.theme-toggle-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.header-icon-btn:active {
+  transform: translateY(0);
 }
 
 .theme-toggle-btn:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.1);
 }
 
+/* ─── Toolbar ─── */
 .editor-toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 3px;
+  padding: 6px 10px;
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
 }
 
 .toolbar-group {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  padding: 2px;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
 }
 
 .toolbar-divider {
   width: 1px;
   height: 24px;
   background-color: var(--toolbar-divider);
-  margin: 0 4px;
+  margin: 0 3px;
+  opacity: 0.5;
 }
 
 .toolbar-btn {
-  padding: 5px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   line-height: 1;
-  min-width: 32px;
+  min-width: 30px;
+  min-height: 30px;
   text-align: center;
 }
 
 .toolbar-btn:hover {
   background-color: var(--bg-hover);
-  border-color: var(--border-hover);
+  color: var(--accent-color);
+  border-color: var(--border-color);
+  transform: translateY(-1px);
 }
 
 .toolbar-btn:active {
   background-color: var(--bg-active);
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
+/* ─── Textarea ─── */
 .editor-textarea {
   flex: 1;
   width: 100%;
-  padding: 20px;
+  padding: 24px;
   border: none;
   resize: none;
   font-family: "Fira Code", "Consolas", "Monaco", monospace;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13.5px;
+  line-height: 1.7;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   outline: none;
   tab-size: 2;
+  letter-spacing: 0.2px;
 }
 
 .editor-textarea::placeholder {
   color: var(--text-placeholder);
+  font-size: 13px;
 }
 
-/* Code block language dropdown */
+/* ─── Code block dropdown ─── */
 .code-dropdown {
   position: relative;
   display: inline-block;
@@ -154,34 +203,36 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 10;
-  margin-top: 4px;
-  padding: 4px;
+  z-index: 100;
+  margin-top: 6px;
+  padding: 6px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px var(--shadow-medium);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px var(--shadow-heavy), 0 2px 8px var(--shadow-light);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2px;
-  min-width: 200px;
-  max-height: 280px;
+  min-width: 220px;
+  max-height: 300px;
   overflow-y: auto;
+  animation: fadeIn 0.15s ease;
 }
 
 .code-dropdown-item {
-  padding: 6px 10px;
+  padding: 7px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: none;
   color: var(--text-primary);
   font-size: 12px;
   font-family: "Fira Code", monospace;
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.15s;
+  transition: all 0.15s ease;
 }
 
 .code-dropdown-item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--accent-glow);
+  color: var(--accent-color);
 }

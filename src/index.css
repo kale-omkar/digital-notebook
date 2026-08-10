@@ -1,5 +1,5 @@
-/* Import Open Sans from Google Fonts (including italic variants) */
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap");
+/* Import Inter for UI, Open Sans for content, Fira Code for code */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap");
 
 * {
@@ -12,42 +12,49 @@
 :root,
 [data-theme="light"] {
   --bg-primary: #ffffff;
-  --bg-secondary: #fafafa;
-  --bg-tertiary: #f5f5f5;
-  --bg-hover: #f0f0f0;
-  --bg-active: #e0e0e0;
-  --text-primary: #333333;
-  --text-secondary: #444444;
-  --text-muted: #888888;
-  --text-placeholder: #aaaaaa;
-  --border-color: #e0e0e0;
-  --border-hover: #b0b0b0;
-  --accent-color: #4a90d9;
-  --heading-h1: #1d4ed8;
-  --heading-h2: #0e7461;
-  --heading-h3: #7e3abf;
-  --heading-h4: #b94a1e;
-  --code-inline-bg: #f0f0f0;
+  --bg-secondary: #fafbfc;
+  --bg-tertiary: #f3f4f6;
+  --bg-hover: #eef0f4;
+  --bg-active: #dfe2e8;
+  --text-primary: #1f2937;
+  --text-secondary: #374151;
+  --text-muted: #9ca3af;
+  --text-placeholder: #c4c9d4;
+  --border-color: #e5e7eb;
+  --border-hover: #b0b5c0;
+  --accent-color: #6366f1;
+  --accent-color-light: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --heading-h1: #4338ca;
+  --heading-h2: #047857;
+  --heading-h3: #7c3aed;
+  --heading-h4: #c2410c;
+  --code-inline-bg: #f1f3f8;
   --code-inline-color: #d63384;
   --blockquote-bg: #f8fafc;
+  --blockquote-border: #6366f1;
   --blockquote-text: #555555;
-  --table-header-bg: #4a90d9;
-  --table-even-row: #f8f9fa;
-  --table-hover-row: #e8f4fd;
+  --table-header-bg: #4f46e5;
+  --table-even-row: #f8f9fc;
+  --table-hover-row: #eef2ff;
   --scrollbar-track: #f1f1f1;
   --scrollbar-thumb: #c1c1c1;
   --scrollbar-thumb-hover: #a1a1a1;
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
-  --shadow-heavy: rgba(0, 0, 0, 0.15);
-  --download-btn-bg: #1a1a1a;
-  --download-btn-hover: #333333;
-  --download-btn-disabled: #999999;
-  --strong-color: #1a1a1a;
-  --link-color: #4a90d9;
-  --toolbar-divider: #d0d0d0;
+  --shadow-light: rgba(0, 0, 0, 0.04);
+  --shadow-medium: rgba(0, 0, 0, 0.08);
+  --shadow-heavy: rgba(0, 0, 0, 0.12);
+  --download-btn-bg: #4f46e5;
+  --download-btn-hover: #4338ca;
+  --download-btn-disabled: #a5a8b8;
+  --strong-color: #111827;
+  --link-color: #6366f1;
+  --toolbar-divider: #e5e7eb;
+  --header-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
 
   font-family:
+    "Inter",
     "Open Sans",
     -apple-system,
     BlinkMacSystemFont,
@@ -69,41 +76,47 @@
 
 /* Dark theme */
 [data-theme="dark"] {
-  --bg-primary: #1e1e2e;
-  --bg-secondary: #252536;
-  --bg-tertiary: #2a2a3c;
-  --bg-hover: #333347;
-  --bg-active: #3d3d52;
-  --text-primary: #d4d4e8;
-  --text-secondary: #b8b8cc;
-  --text-muted: #7a7a8e;
-  --text-placeholder: #5a5a6e;
-  --border-color: #3a3a4e;
-  --border-hover: #5a5a6e;
-  --accent-color: #6ea8eb;
-  --heading-h1: #60a5fa;
-  --heading-h2: #2dd4bf;
+  --bg-primary: #0f1117;
+  --bg-secondary: #161822;
+  --bg-tertiary: #1c1e2e;
+  --bg-hover: #252840;
+  --bg-active: #313558;
+  --text-primary: #e2e4f0;
+  --text-secondary: #b8bcd0;
+  --text-muted: #6b6f85;
+  --text-placeholder: #4a4e64;
+  --border-color: #2a2d42;
+  --border-hover: #454868;
+  --accent-color: #818cf8;
+  --accent-color-light: #a5b4fc;
+  --accent-glow: rgba(129, 140, 248, 0.2);
+  --heading-h1: #818cf8;
+  --heading-h2: #34d399;
   --heading-h3: #c4b5fd;
   --heading-h4: #fdba74;
-  --code-inline-bg: #2a2a3c;
+  --code-inline-bg: #1e2035;
   --code-inline-color: #f472b6;
-  --blockquote-bg: #252536;
+  --blockquote-bg: #1a1c30;
+  --blockquote-border: #818cf8;
   --blockquote-text: #9a9ab0;
-  --table-header-bg: #3a5a8e;
-  --table-even-row: #2a2a3c;
-  --table-hover-row: #333355;
-  --scrollbar-track: #252536;
-  --scrollbar-thumb: #4a4a5e;
-  --scrollbar-thumb-hover: #5a5a6e;
-  --shadow-light: rgba(0, 0, 0, 0.2);
-  --shadow-medium: rgba(0, 0, 0, 0.3);
-  --shadow-heavy: rgba(0, 0, 0, 0.4);
-  --download-btn-bg: #d4d4e8;
-  --download-btn-hover: #e4e4f0;
-  --download-btn-disabled: #4a4a5e;
-  --strong-color: #e4e4f0;
-  --link-color: #6ea8eb;
-  --toolbar-divider: #4a4a5e;
+  --table-header-bg: #3730a3;
+  --table-even-row: #1a1c2e;
+  --table-hover-row: #252850;
+  --scrollbar-track: #161822;
+  --scrollbar-thumb: #3a3d55;
+  --scrollbar-thumb-hover: #505478;
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.5);
+  --download-btn-bg: #6366f1;
+  --download-btn-hover: #818cf8;
+  --download-btn-disabled: #3a3d55;
+  --strong-color: #f0f0ff;
+  --link-color: #818cf8;
+  --toolbar-divider: #2a2d42;
+  --header-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --glass-bg: rgba(15, 17, 23, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
 
   color-scheme: dark;
   color: var(--text-primary);
@@ -127,6 +140,7 @@ a {
   font-weight: 500;
   color: var(--link-color);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 a:hover {
@@ -134,18 +148,18 @@ a:hover {
 }
 
 button {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", "Open Sans", sans-serif;
 }
 
 input,
 textarea {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", "Open Sans", sans-serif;
 }
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -154,9 +168,42 @@ textarea {
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+}
+
+/* ─── Utility Animations ─── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
 }

@@ -3,6 +3,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background-color: var(--bg-primary);
 }
 
 .main-content {
@@ -18,7 +19,45 @@
   overflow: hidden;
 }
 
-/* Responsive adjustments */
+/* ─── Resize Divider ─── */
+.resize-divider {
+  flex: 0 0 4px;
+  background-color: var(--border-color);
+  cursor: col-resize;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 5;
+}
+
+.resize-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 32px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.resize-divider:hover {
+  flex: 0 0 4px;
+  background-color: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.resize-divider:hover::before {
+  opacity: 0.6;
+}
+
+.resize-divider:active {
+  background-color: var(--accent-color-light);
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 900px) {
   .editor-preview-container {
     flex-direction: column;
@@ -32,18 +71,4 @@
   .resize-divider {
     display: none;
   }
-}
-
-/* Resize divider */
-.resize-divider {
-  flex: 0 0 5px;
-  background-color: var(--border-color);
-  cursor: col-resize;
-  transition: background-color 0.15s;
-  position: relative;
-}
-
-.resize-divider:hover,
-.resize-divider:active {
-  background-color: var(--accent-color);
 }

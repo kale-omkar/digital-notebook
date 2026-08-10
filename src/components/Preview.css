@@ -11,19 +11,47 @@
   flex: 1 1 100%;
 }
 
+/* ─── Header ─── */
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background-color: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.preview-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--header-gradient);
+  opacity: 0.6;
+}
+
+.preview-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-title-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color);
+  opacity: 0.8;
 }
 
 .preview-title {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .preview-actions {
@@ -32,39 +60,75 @@
   gap: 8px;
 }
 
+/* ─── Download Button ─── */
 .download-btn {
-  padding: 4px 10px;
-  background-color: var(--download-btn-bg);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--header-gradient);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.1s;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
 }
 
 .download-btn:hover {
-  background-color: var(--download-btn-hover);
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
 }
 
 .download-btn:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
 .download-btn:disabled {
-  background-color: var(--download-btn-disabled);
+  background: var(--download-btn-disabled);
   cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
 }
 
-[data-theme="dark"] .download-btn {
-  color: #1e1e2e;
+.download-btn .spinner {
+  animation: spin 1s linear infinite;
 }
 
-[data-theme="dark"] .download-btn:disabled {
-  color: #7a7a8e;
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* ─── Header Icon Button ─── */
+.preview .header-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preview .header-icon-btn:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background-color: var(--accent-glow);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.preview .header-icon-btn:active {
+  transform: translateY(0);
 }
 
 /* ─── Preview Content Area ─── */
@@ -76,9 +140,11 @@
   line-height: 1.75;
   max-width: 100%;
   font-size: 15px;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text-secondary);
   overflow-wrap: break-word;
   word-wrap: break-word;
+  animation: fadeIn 0.2s ease;
 }
 
 /* ─── Placeholder ─── */
@@ -88,15 +154,24 @@
   justify-content: center;
   height: 100%;
   color: var(--text-muted);
+  animation: fadeInScale 0.3s ease;
 }
 
 .placeholder-content {
   text-align: center;
-  max-width: 360px;
+  max-width: 380px;
+}
+
+.placeholder-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--accent-color);
+  opacity: 0.4;
 }
 
 .placeholder-content h2 {
-  font-size: 1.2em;
+  font-size: 1.15em;
   font-weight: 600;
   margin-bottom: 6px;
   color: var(--text-muted);
@@ -105,29 +180,43 @@
 .placeholder-content > p {
   font-size: 13px;
   color: var(--text-placeholder);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .placeholder-features {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
   text-align: left;
 }
 
 .placeholder-feature {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
+  gap: 3px;
+  padding: 12px 14px;
   background-color: var(--bg-secondary);
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.placeholder-feature:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.feature-icon {
+  color: var(--accent-color);
+  margin-bottom: 2px;
+  opacity: 0.7;
 }
 
 .placeholder-feature strong {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -143,12 +232,13 @@
 /* ─── Headings ─── */
 .preview-content h1 {
   font-size: 1.85em;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 20px 0;
-  padding-bottom: 10px;
-  border-bottom: 2.5px solid var(--heading-h1);
+  padding-bottom: 2px;
+  padding-left: 14px;
+  border-left: 4px solid var(--heading-h1);
   color: var(--heading-h1);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.3;
 }
 
@@ -156,8 +246,9 @@
   font-size: 1.45em;
   font-weight: 700;
   margin: 32px 0 14px 0;
-  padding-bottom: 6px;
-  border-bottom: 1.5px solid var(--heading-h2);
+  padding-bottom: 2px;
+  padding-left: 14px;
+  border-left: 4px solid var(--heading-h2);
   color: var(--heading-h2);
   line-height: 1.35;
 }
@@ -166,6 +257,8 @@
   font-size: 1.2em;
   font-weight: 700;
   margin: 26px 0 10px 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--heading-h3);
   color: var(--heading-h3);
   line-height: 1.4;
 }
@@ -192,7 +285,7 @@
   margin: 14px 0 6px 0;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   line-height: 1.4;
 }
 
@@ -236,19 +329,16 @@
   line-height: 1.7;
 }
 
-/* Nested lists */
 .preview-content li > ul,
 .preview-content li > ol {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
-/* Nested list items slightly smaller spacing */
 .preview-content li li {
   margin-bottom: 3px;
 }
 
-/* Paragraphs inside list items */
 .preview-content li > p {
   margin-bottom: 6px;
 }
@@ -260,13 +350,18 @@
 /* ─── Blockquote ─── */
 .preview-content blockquote {
   margin: 18px 0;
-  padding: 12px 20px;
-  border-left: 4px solid var(--accent-color);
+  padding: 14px 20px;
+  border-left: 4px solid var(--blockquote-border);
   background-color: var(--blockquote-bg);
   color: var(--blockquote-text);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 10px 10px 0;
   font-size: 14.5px;
   font-style: italic;
+  transition: all 0.2s ease;
+}
+
+.preview-content blockquote:hover {
+  background-color: var(--accent-glow);
 }
 
 .preview-content blockquote p {
@@ -281,49 +376,113 @@
 /* ─── Inline Code ─── */
 .inline-code {
   background-color: var(--code-inline-bg);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: 5px;
   font-family: "Fira Code", "Consolas", "Monaco", monospace;
-  font-size: 0.85em;
+  font-size: 0.84em;
   color: var(--code-inline-color);
   border: 1px solid var(--border-color);
   word-break: break-word;
+  font-weight: 500;
 }
 
 /* ─── Code Blocks ─── */
 .code-block-wrapper {
-  margin: 16px 0;
-  border-radius: 8px;
+  margin: 18px 0;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px var(--shadow-heavy);
+  background-color: #1e1e2e;
+  box-shadow: 0 4px 16px var(--shadow-medium), 0 1px 3px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
+}
+
+.code-block-wrapper:hover {
+  box-shadow: 0 8px 24px var(--shadow-heavy), 0 2px 6px var(--shadow-medium);
+  transform: translateY(-1px);
 }
 
 .code-block-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 14px;
-  background-color: #2d2d3d;
-  border-bottom: 1px solid #3a3a4a;
+  padding: 10px 16px;
+  background-color: #252535;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+
+.code-window-controls {
+  display: flex;
+  gap: 7px;
+}
+
+.mac-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
+.mac-close {
+  background-color: #ff5f56;
+}
+
+.mac-minimize {
+  background-color: #ffbd2e;
+}
+
+.mac-maximize {
+  background-color: #27c93f;
 }
 
 .code-block-lang {
   font-family: "Fira Code", monospace;
   font-size: 11px;
-  font-weight: 500;
-  color: #9a9ab0;
+  font-weight: 600;
+  color: rgba(154, 154, 176, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.code-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid rgba(74, 74, 94, 0.6);
+  border-radius: 6px;
+  color: rgba(154, 154, 176, 0.8);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.code-copy-btn:hover {
+  background: rgba(74, 74, 94, 0.4);
+  color: white;
+  border-color: rgba(100, 100, 130, 0.6);
+}
+
+.code-copy-btn.copied {
+  color: #27c93f;
+  border-color: rgba(39, 201, 63, 0.4);
 }
 
 .code-block {
   border-radius: 0 !important;
   margin: 0 !important;
   font-size: 13.5px !important;
-  line-height: 1.6 !important;
+  line-height: 1.65 !important;
+  background-color: transparent !important;
 }
 
-/* Code blocks inside list items — less margin */
 .preview-content li .code-block-wrapper {
   margin: 10px 0;
 }
@@ -348,8 +507,13 @@
 .table-wrapper {
   overflow-x: auto;
   margin: 18px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.table-wrapper:hover {
+  box-shadow: 0 4px 12px var(--shadow-light);
 }
 
 .preview-content table {
@@ -368,12 +532,14 @@
   text-align: left;
   font-weight: 600;
   font-size: 13px;
+  letter-spacing: 0.3px;
 }
 
 .preview-content td {
   padding: 9px 16px;
   border-bottom: 1px solid var(--border-color);
   font-size: 13.5px;
+  transition: background-color 0.15s ease;
 }
 
 .preview-content tbody tr:nth-child(even) {
@@ -390,24 +556,27 @@
   text-decoration: none;
   border-bottom: 1px dashed var(--link-color);
   padding-bottom: 1px;
+  transition: all 0.2s ease;
 }
 
 .preview-content a:hover {
   text-decoration: none;
   border-bottom-style: solid;
+  opacity: 0.85;
 }
 
 /* ─── Horizontal Rule ─── */
 .preview-content hr {
   border: none;
-  border-top: 1.5px solid var(--border-color);
-  margin: 28px 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin: 32px 0;
 }
 
 /* ─── Strong and Emphasis ─── */
 .preview-content strong {
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--strong-color);
 }
 
 .preview-content em {
@@ -419,16 +588,23 @@
 /* ─── Images ─── */
 .preview-content img {
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: 10px;
   margin: 12px 0;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  transition: transform 0.2s ease;
 }
 
-/* ═══════════════════════════════════════════
-   PDF / PAGE-BREAK RULES
-   html2pdf respects these via mode: ["css"]
-   ═══════════════════════════════════════════ */
+.preview-content img:hover {
+  transform: scale(1.01);
+}
 
-/* Avoid splitting these across pages */
+/* ═══════════════════════════════════════════════════
+   PDF PAGE-BREAK RULES
+   These CSS rules are used by html2pdf's "css" mode
+   to detect where page breaks should occur.
+   All other PDF styles are applied inline in JS.
+   ═══════════════════════════════════════════════════ */
+
 .preview-content .code-block-wrapper,
 .preview-content blockquote,
 .preview-content .table-wrapper,
@@ -437,13 +613,6 @@
   page-break-inside: avoid;
 }
 
-.preview-content p,
-.preview-content li {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
-/* Keep headings attached to content below */
 .preview-content h1,
 .preview-content h2,
 .preview-content h3,
@@ -456,101 +625,3 @@
   page-break-inside: avoid;
 }
 
-/* ═══════════════════════════════════════════
-   PDF RENDERING OVERRIDES
-   Applied via .pdf-rendering class on the
-   cloned element during html2pdf capture.
-   ═══════════════════════════════════════════ */
-
-/* Root container */
-.pdf-rendering {
-  padding: 0 !important;
-  box-sizing: border-box;
-  overflow: hidden !important;
-  overflow-wrap: break-word !important;
-  word-wrap: break-word !important;
-}
-
-/* All children: constrain width and enable wrapping */
-.pdf-rendering * {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  overflow-wrap: break-word !important;
-  word-wrap: break-word !important;
-}
-
-/* Lists: keep markers visible, tight spacing */
-.pdf-rendering ul,
-.pdf-rendering ol {
-  overflow: visible !important;
-  padding-left: 24px !important;
-}
-
-.pdf-rendering li {
-  overflow: visible !important;
-  padding-left: 4px !important;
-}
-
-/* Inline code: allow wrapping but keep inline flow */
-.pdf-rendering .inline-code {
-  word-break: break-word;
-  white-space: normal;
-  display: inline;
-}
-
-/* Code blocks: wrap long lines, remove decorations */
-.pdf-rendering .code-block-wrapper {
-  overflow: hidden !important;
-  box-shadow: none !important;
-  border-radius: 0;
-  max-width: 100% !important;
-  width: 100% !important;
-}
-
-.pdf-rendering .code-block-header {
-  border-radius: 0;
-}
-
-.pdf-rendering .code-block {
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  overflow-wrap: break-word !important;
-  overflow: hidden !important;
-}
-
-.pdf-rendering pre,
-.pdf-rendering code {
-  white-space: pre-wrap !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-}
-
-/* Code blocks inside list items: constrain to parent */
-.pdf-rendering li .code-block-wrapper {
-  max-width: 100% !important;
-  width: calc(100% - 4px) !important;
-}
-
-.pdf-rendering li p {
-  overflow: hidden !important;
-}
-
-/* Tables and blockquotes: clean edges */
-.pdf-rendering .table-wrapper {
-  overflow: hidden !important;
-  border-radius: 0;
-}
-
-.pdf-rendering blockquote {
-  border-radius: 0;
-}
-
-/* Emphasis and strong: ensure italic/bold render in PDF */
-.pdf-rendering em {
-  font-style: italic !important;
-  font-family: "Open Sans", sans-serif !important;
-}
-
-.pdf-rendering strong {
-  font-weight: 700 !important;
-}
