@@ -87,11 +87,11 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
 
     // ── Theme palette ──
     const T = {
-      h1: "#1a2e6b", h2: "#005a8a", h3: "#005a8a", h4: "#111827",
+      h1: "#14284a", h2: "#1d4fa3", h3: "#1d4fa3", h4: "#1f2937",
       body: "#1a1a1a", strong: "#000000", muted: "#4b5563",
       codeBg: "#eef2f7", codeText: "#9f1239", codeBdr: "#d1d5db",
-      bqBg: "#f0f7ff", bqBdr: "#1a2e6b", tblHdr: "#1a2e6b",
-      link: "#1a2e6b", border: "#e5e7eb",
+      bqBg: "#f0f5fc", bqBdr: "#14284a", tblHdr: "#14284a",
+      link: "#1d4fa3", border: "#e5e7eb",
     };
 
     // ── Clone the preview DOM ──
@@ -149,19 +149,23 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
       el.style.setProperty("opacity", "1", "important");
     });
 
-    // ── Prevent page-break text clipping ──
-    // html2pdf can slice an element mid-line at page boundaries, causing
-    // clipped text at the bottom of one page and duplicated/clipped text
-    // at the top of the next. Setting break-inside:avoid on block elements
-    // tells html2pdf to push the whole block to the next page instead.
-    clone.querySelectorAll("p, li, blockquote, h1, h2, h3, h4, h5, h6, .code-block-wrapper, .table-wrapper, .flowchart-wrapper").forEach(el => {
+    // (Page-break protection for code blocks, tables, blockquotes, images,
+    // and headings is already handled by the .preview-content break-inside/
+    // break-after rules in Preview.css, which the clone still carries via
+    // its class names.)
+    //
+    // Paragraphs and list items still need it explicitly: without any
+    // break-inside rule, html2pdf's pixel-slicing can cut a raw canvas row
+    // that lands mid-line rather than between lines — confirmed directly in
+    // a rendered PDF (a bullet's text was sliced in half, top portion
+    // stranded at the bottom of one page, bottom portion bleeding onto the
+    // top of the next). Unlike the earlier regression, this alone (without
+    // "avoid-all" pagebreak mode) shouldn't reproduce the blank-gap issue —
+    // that came from the cruder whole-page heuristic avoid-all uses, not
+    // from these per-element CSS rules.
+    clone.querySelectorAll("p, li").forEach(el => {
       el.style.breakInside = "avoid";
-      el.style.pageBreakInside = "avoid"; // legacy fallback
-    });
-    // Keep headings attached to the content that follows them
-    clone.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(el => {
-      el.style.breakAfter = "avoid";
-      el.style.pageBreakAfter = "avoid";
+      el.style.pageBreakInside = "avoid";
     });
 
     // ════════════════════════════════════
@@ -173,7 +177,17 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
       h.style.cssText = `color:${T.h1};border-left:5px solid ${T.h1};padding-left:16px;margin:0 0 22px 0;font-size:26px;font-weight:800;line-height:1.3;letter-spacing:-0.01em`;
     });
     clone.querySelectorAll("h2").forEach(h => {
-      h.style.cssText = `color:${T.h2};border-left:4px solid ${T.h2};padding-left:14px;margin:28px 0 12px 0;font-size:19px;font-weight:700;line-height:1.35`;
+      h.style.cssText = `color:${T.h2};border-left:4px solid ${T.h2};padding-left:14px;margin:30px 0 14px 0;font-size:19px;font-weight:700;line-height:1.35`;
+      // Turn a leading "N. " into a small number badge instead of a plain
+      // digit — only for plain-text headings, so anything with nested
+      // markup (a code span, emphasis, etc.) is left exactly as-is.
+      if (h.children.length === 0) {
+        const m = (h.textContent || "").match(/^(\d+)\.\s*(.+)$/);
+        if (m) {
+          const [, num, rest] = m;
+          h.innerHTML = `<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:${T.h2};color:#fff;font-size:12px;font-weight:800;vertical-align:middle;position:relative;top:-2px;margin-right:9px">${num}</span>${rest}`;
+        }
+      }
     });
     clone.querySelectorAll("h3").forEach(h => {
       h.style.cssText = `color:${T.h3};border-left:3px solid ${T.h3};padding-left:12px;margin:24px 0 10px 0;font-size:17px;font-weight:700;line-height:1.35`;
@@ -205,13 +219,40 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
         el.style.pageBreakAfter = "avoid";
       }
     });
+    // ── Study-notes callouts ──────────────────────────────────────────────
+    // This PDF is for studying, not just reading once — the facts someone
+    // needs to catch while scanning back through before an exam/interview
+    // (complexity, edge cases, the actual fix) shouldn't look identical to
+    // regular explanatory bullets. Detect a few common leading-bold-label
+    // patterns and give just those bullets a colored callout treatment.
+    const CALLOUTS = [
+      { test: /^fix\b/i, bg: "#f0fdf4", border: "#16a34a" },                                       // solution → green
+      { test: /^(time complexity|space complexity)\b/i, bg: "#f0fdfa", border: "#0f766e" },          // key metric → teal
+      { test: /^(negative inputs?|large inputs?|edge cases?|corner cases?)\b/i, bg: "#fffbeb", border: "#d97706" }, // watch out → amber
+    ];
+    function leadingStrongText(li) {
+      let first = li.firstElementChild;
+      if (first && first.tagName === "P") first = first.firstElementChild;
+      // Check both <strong> and <em> — this doc's "Fix:" label is italic
+      // rather than bold, and either is a reasonable "label" convention.
+      return first && (first.tagName === "STRONG" || first.tagName === "EM")
+        ? (first.textContent || "").trim()
+        : "";
+    }
+    // Detect matches up front so the bullet-drawing pass below can skip
+    // them — a callout gets a colored box instead of a bullet, not both.
+    const calloutLis = new Map();
+    clone.querySelectorAll("ul > li:not(.task-list-item)").forEach(li => {
+      const callout = CALLOUTS.find(c => c.test.test(leadingStrongText(li)));
+      if (callout) calloutLis.set(li, callout);
+    });
+
     clone.querySelectorAll("li").forEach(el => {
       el.style.color = T.body;
       el.style.fontSize = "13.5px";
       el.style.lineHeight = "1.7";
       el.style.marginBottom = "4px";
       el.style.overflow = "visible";
-      el.style.position = "relative";
     });
     clone.querySelectorAll("ul,ol").forEach(el => {
       el.style.overflow = "visible";
@@ -232,12 +273,33 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
     });
     clone.querySelectorAll("ul > li").forEach(el => {
       if (el.classList.contains("task-list-item")) return;
+      if (calloutLis.has(el)) return; // gets a callout box below instead
       el.style.position = "relative";
       el.style.paddingLeft = "16px";
       const bullet = document.createElement("span");
       bullet.textContent = "\u2022";
       bullet.style.cssText = `position:absolute;left:2px;top:0;color:${T.body}`;
       el.prepend(bullet);
+    });
+    // Consecutive callouts of the *same* type (e.g. Time Complexity next to
+    // Space Complexity) get pulled close together so they read as one
+    // grouped card rather than isolated notes — full spacing is kept
+    // wherever a callout borders unrelated content.
+    const calloutEntries = Array.from(calloutLis.entries());
+    calloutEntries.forEach(([li, callout], idx) => {
+      const prev = calloutEntries[idx - 1];
+      const next = calloutEntries[idx + 1];
+      const groupedWithPrev = prev && prev[1] === callout && li.previousElementSibling === prev[0];
+      const groupedWithNext = next && next[1] === callout && li.nextElementSibling === next[0];
+      li.style.setProperty("list-style", "none", "important");
+      li.style.setProperty("background", callout.bg, "important");
+      li.style.setProperty("border-left", `3px solid ${callout.border}`, "important");
+      li.style.setProperty("border-radius", "0 6px 6px 0", "important");
+      li.style.setProperty("padding", "10px 12px 10px 14px", "important");
+      li.style.setProperty("margin-top", groupedWithPrev ? "3px" : "20px", "important");
+      li.style.setProperty("margin-bottom", groupedWithNext ? "3px" : "20px", "important");
+      li.style.setProperty("margin-left", "0", "important");
+      li.style.setProperty("margin-right", "0", "important");
     });
 
     // Bold / italic / links
@@ -266,7 +328,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
     // clipping bug was caused by the broad "code" tag selector applying
     // overflow:hidden; that's been fixed separately, so nowrap is safe.
     clone.querySelectorAll(".inline-code").forEach(el => {
-      el.style.cssText = `background:${T.codeBg};color:${T.codeText};border:1px solid ${T.codeBdr};border-radius:4px;padding:1px 5px;font-family:"Fira Code","Consolas",monospace;font-size:0.82em;font-weight:400;display:inline;white-space:nowrap;overflow:visible`;
+      el.style.cssText = `background:${T.codeBg};color:${T.codeText};border:1px solid ${T.codeBdr};border-radius:4px;padding:1px 5px;font-family:"Fira Code","Consolas",monospace;font-size:0.82em;font-weight:400;display:inline;white-space:nowrap;overflow-wrap:break-word`;
     });
 
     // ── Code blocks — light theme for study notes ──────────────────────────
@@ -341,14 +403,11 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
       el.style.fontFamily = '"Fira Code","Consolas","Monaco",monospace';
     });
 
-    // Padding on the code content area
-    clone.querySelectorAll(".code-block").forEach(el => {
+    // Padding, and full-width fill, for the code content box (and its
+    // possible inner wrapper div, depending on the library's output shape)
+    clone.querySelectorAll(".code-block,.code-block > div").forEach(el => {
       el.style.setProperty("padding", "12px 16px", "important");
       el.style.setProperty("margin", "0", "important");
-    });
-
-    // Ensure the inner containers fill 100% width
-    clone.querySelectorAll(".code-block,.code-block > div").forEach(el => {
       el.style.setProperty("width", "100%", "important");
       el.style.setProperty("box-sizing", "border-box", "important");
     });
@@ -363,55 +422,62 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
     //
     // Instead we:
     //   1. Read each span's current inline `color` (an RGB string set by oneDark)
-    //   2. Normalize it to "r,g,b" for reliable lookup
+    //   2. Find the closest oneDark reference color by distance, not exact match
+    //      (exact string matching is one rounding difference away from every
+    //      token silently collapsing to the same fallback color)
     //   3. Map it to the corresponding GitHub-Light color
 
-    // Convert any CSS color string to a normalised "r,g,b" key.
-    // Handles both "rgb(r, g, b)" and "hsl(…)" forms (the browser usually
-    // stores the computed value as rgb, but we handle hsl just in case).
-    function colorToRGBKey(c) {
+    // Parses "rgb(r, g, b)" or "rgba(r, g, b, a)" into [r,g,b]. Browsers
+    // normalize any color value (oneDark sets hsl(...) strings) to one of
+    // these two forms when the inline style is read back.
+    function parseRGB(c) {
       if (!c) return null;
-      c = c.trim();
-      const rgb = c.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
-      if (rgb) return `${rgb[1]},${rgb[2]},${rgb[3]}`;
-      return null; // can't parse — leave as default
+      const m = c.trim().match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      return m ? [+m[1], +m[2], +m[3]] : null;
     }
 
-    // oneDark HSL values → browser RGB → light-theme hex.
-    // Generated by converting each HSL from the oneDark theme to RGB:
-    //   hsl(286,60%,67%) → rgb(198,120,221) — keyword
-    //   hsl(95,38%,62%)  → rgb(152,195,121) — string / builtin / char / regex
-    //   hsl(207,82%,66%) → rgb(97,175,239)  — function / variable / operator
-    //   hsl(29,54%,61%)  → rgb(209,154,102) — number / class-name / boolean
-    //   hsl(355,65%,65%) → rgb(224,108,117) — property / tag / symbol / deleted
-    //   hsl(220,10%,40%) → rgb(92,99,112)   — comment
-    //   hsl(220,14%,71%) → rgb(171,178,191) — default text / punctuation / entity
-    //   hsl(187,47%,55%) → rgb(86,182,194)  — url
-    //   hsl(5,48%,51%)   → rgb(190,80,70)   — interpolation-punctuation
-    const DARK_TO_LIGHT = {
-      "198,120,221": { color: "#0550ae" },                 // keyword → navy
-      "152,195,121": { color: "#116329" },                 // string/builtin → forest green
-      "97,175,239":  { color: "#8250df" },                 // function/variable → purple
-      "209,154,102": { color: "#953800" },                 // number/class-name → rust
-      "224,108,117": { color: "#cf222e" },                 // property/tag → crimson
-      "92,99,112":   { color: "#6e7781", italic: true },   // comment → muted slate
-      "171,178,191": { color: "#24292f" },                 // default/punctuation → near-black
-      "86,182,194":  { color: "#0550ae" },                 // url → navy
-      "190,80,70":   { color: "#cf222e" },                 // interpolation → crimson
-    };
+    // oneDark HSL values → exact RGB (verified against the real theme
+    // package, not hand-converted) → light-theme hex equivalent.
+    const DARK_TO_LIGHT = [
+      { rgb: [198, 120, 221], color: "#0550ae" },                // keyword → navy
+      { rgb: [152, 195, 121], color: "#116329" },                // string/builtin → forest green
+      { rgb: [97, 175, 239], color: "#8250df" },                 // function/variable → purple
+      { rgb: [209, 154, 102], color: "#953800" },                // number/class-name → rust
+      { rgb: [224, 108, 117], color: "#cf222e" },                // property/tag → crimson
+      { rgb: [92, 99, 112], color: "#6e7781", italic: true },    // comment → muted slate
+      { rgb: [171, 178, 191], color: "#24292f" },                // default/punctuation → near-black
+      { rgb: [86, 182, 194], color: "#0550ae" },                 // url → navy
+      { rgb: [190, 80, 70], color: "#cf222e" },                  // interpolation → crimson
+    ];
+
+    function nearestLightColor(rgb) {
+      let best = null, bestDist = Infinity;
+      for (const entry of DARK_TO_LIGHT) {
+        const [r, g, b] = entry.rgb;
+        const d = (r - rgb[0]) ** 2 + (g - rgb[1]) ** 2 + (b - rgb[2]) ** 2;
+        if (d < bestDist) { bestDist = d; best = entry; }
+      }
+      return best;
+    }
 
     clone.querySelectorAll(".code-block-wrapper span").forEach(el => {
-      const key = colorToRGBKey(el.style.color);
-      const mapping = key && DARK_TO_LIGHT[key];
-      if (mapping) {
-        el.style.color = mapping.color;
-        if (mapping.italic) el.style.fontStyle = "italic";
-      } else {
-        // Unmapped or no inline color → default near-black
-        el.style.color = "#24292f";
-      }
-      // Remove dark text-shadow from oneDark
+      const rgb = parseRGB(el.style.color);
+      if (!rgb) return; // no inline color (e.g. plain whitespace spans) — nothing to remap
+      const mapping = nearestLightColor(rgb);
+      el.style.color = mapping.color;
+      el.style.fontStyle = mapping.italic ? "italic" : "normal";
       el.style.textShadow = "none";
+    });
+
+    // Line numbers happen to share the theme's comment color at the source,
+    // so the loop above just gave them an italic "comment" treatment — give
+    // them their own clean, non-italic, muted gutter style instead so a "3"
+    // at the start of a line doesn't read like a stray code comment.
+    clone.querySelectorAll(".code-block-wrapper .linenumber").forEach(el => {
+      el.style.setProperty("color", "#8c959f", "important");
+      el.style.setProperty("font-style", "normal", "important");
+      el.style.setProperty("border-right", "1px solid #d0d7de", "important");
+      el.style.setProperty("margin-right", "1em", "important");
     });
 
     // Background of all internal wrapper divs → transparent so the
@@ -502,11 +568,11 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
 
       const pdf = await html2pdf()
         .set({
-          margin: [10, 10, 10, 10], // top, right, bottom, left (mm)
+          margin: [14, 10, 14, 10], // top, right, bottom, left (mm)
           filename: `${pdfTitle}.pdf`,
-          image: { type: "jpeg", quality: 1 },
+          image: { type: "png" },
           html2canvas: {
-            scale: 4,
+            scale: 3,
             useCORS: true,
             letterRendering: true,
             logging: false,
@@ -517,7 +583,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
             backgroundColor: "#ffffff",
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+          pagebreak: { mode: ["css", "legacy"] },
         })
         .from(clone)
         .toPdf()
@@ -537,13 +603,13 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
         if (i !== 1) {
           pdf.setFontSize(8);
           pdf.setTextColor(180, 180, 180);
-          pdf.text(pdfTitle, pw - 10, 7, { align: "right" });
+          pdf.text(pdfTitle, pw - 10, 6, { align: "right" });
           pdf.setDrawColor(210, 210, 210);
           pdf.setLineWidth(0.3);
-          pdf.line(10, 9, pw - 10, 9);
+          pdf.line(10, 10, pw - 10, 10);
         }
         // Footer — separator line + page number
-        const fy = ph - 5;
+        const fy = ph - 6;
         pdf.setDrawColor(210, 210, 210);
         pdf.setLineWidth(0.3);
         pdf.line(10, fy - 4, pw - 10, fy - 4);
@@ -664,6 +730,8 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                         language={lang}
                         PreTag="div"
                         className="code-block"
+                        showLineNumbers
+                        lineNumberStyle={{ minWidth: "2.4em", paddingRight: "1em", userSelect: "none" }}
                         {...props}
                       >
                         {codeString}
