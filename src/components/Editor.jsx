@@ -443,6 +443,83 @@ function Editor({
     return () => textarea.removeEventListener("keydown", handleKeyDown);
   }, [insertBold, insertItalic, insertLink, insertInlineCode]);
 
+  const compressAndInsertImage = useCallback(
+    (file) => {
+      const placeholderId = Date.now();
+      const placeholderText = `![Uploading image ${placeholderId}...]()`;
+      insertAtCursor(placeholderText, "", "");
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.7 quality
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
+          try {
+            // Store the data URI in a separate localStorage object
+            const storedImages = JSON.parse(
+              localStorage.getItem("codestudynotes-images") || "{}"
+            );
+            storedImages[placeholderId] = dataUrl;
+            localStorage.setItem(
+              "codestudynotes-images",
+              JSON.stringify(storedImages)
+            );
+
+            // Replace placeholder with just the ID reference
+            const currentContent = contentRef.current;
+            const newText = currentContent.replace(
+              placeholderText,
+              `![Pasted image](id:${placeholderId})`
+            );
+            onChangeRef.current(newText);
+          } catch (e) {
+            // If storage is full (5MB limit hit), alert and remove placeholder
+            alert("Storage full! Cannot paste any more images.");
+            const newText = contentRef.current.replace(placeholderText, "");
+            onChangeRef.current(newText);
+          }
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    [insertAtCursor],
+  );
+
+  const handlePaste = useCallback(
+    (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") === 0) {
+          e.preventDefault();
+          const file = items[i].getAsFile();
+          compressAndInsertImage(file);
+          break; // Only handle the first pasted image
+        }
+      }
+    },
+    [compressAndInsertImage],
+  );
+
   const stats = useMemo(() => {
     if (!content) return { words: 0, chars: 0 };
     const words = content.trim().split(/\s+/).filter(Boolean).length;
@@ -624,6 +701,7 @@ Math with LaTeX:  $O(n \\log n)$  or block:
 Tables, blockquotes, links, and more!`}
         value={content}
         onChange={(e) => onChange(e.target.value)}
+        onPaste={handlePaste}
       />
     </div>
   );

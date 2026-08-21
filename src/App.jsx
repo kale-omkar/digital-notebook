@@ -17,8 +17,20 @@ function useLocalStorage(key, defaultValue) {
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // localStorage full or unavailable
+    } catch (e) {
+      if (
+        e instanceof DOMException &&
+        (e.code === 22 ||
+          e.code === 1014 ||
+          e.name === "QuotaExceededError" ||
+          e.name === "NS_ERROR_DOM_QUOTA_REACHED")
+      ) {
+        alert(
+          "CRITICAL: Local storage is full! Your recent changes could not be saved. Please remove some images to free up space.",
+        );
+      } else {
+        console.error("Error saving to localStorage", e);
+      }
     }
   }, [key, value]);
 

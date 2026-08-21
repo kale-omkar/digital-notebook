@@ -73,6 +73,18 @@ function extractTitle(content) {
   );
 }
 
+function safeUrlTransform(url) {
+  const allowedProtocols = ["http:", "https:", "mailto:", "tel:", "id:", "data:"];
+  const protocolMatch = url.match(/^([a-z0-9.+-]+):/i);
+  if (protocolMatch) {
+    if (allowedProtocols.includes(protocolMatch[1].toLowerCase() + ":")) {
+      return url;
+    }
+    return "";
+  }
+  return url;
+}
+
 function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
   const previewRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -149,7 +161,23 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
+            urlTransform={safeUrlTransform}
             components={{
+              img({ src, alt, ...props }) {
+                let finalSrc = src;
+                if (src && src.startsWith("id:")) {
+                  const imgId = src.replace("id:", "");
+                  try {
+                    const storedImages = JSON.parse(
+                      localStorage.getItem("codestudynotes-images") || "{}"
+                    );
+                    finalSrc = storedImages[imgId] || src;
+                  } catch (e) {
+                    // fallback to original src on error
+                  }
+                }
+                return <img src={finalSrc} alt={alt} {...props} />;
+              },
               pre({ children }) {
                 return <>{children}</>;
               },
