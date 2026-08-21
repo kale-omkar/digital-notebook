@@ -207,3 +207,84 @@ textarea {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
   50% { box-shadow: 0 0 0 6px transparent; }
 }
+
+/* ─── Print Stylesheet ─── */
+@media print {
+  @page {
+    margin: 1.5cm 1.5cm;
+  }
+
+  :root, body, [data-theme="dark"], [data-theme="light"] {
+    --bg-primary: #ffffff !important;
+    --bg-secondary: #ffffff !important;
+    --bg-tertiary: #ffffff !important;
+    --text-primary: #1f2937 !important;
+    --text-secondary: #374151 !important;
+    --text-muted: #6b7280 !important;
+    --border-color: #e5e7eb !important;
+    --heading-h1: #1e3a8a !important;
+    --heading-h2: #0369a1 !important;
+    --heading-h3: #0369a1 !important;
+    --heading-h4: #1f2937 !important;
+    --code-inline-bg: #eef2f7 !important;
+    --code-inline-color: #9f1239 !important;
+    --blockquote-bg: #f0f7ff !important;
+    --blockquote-border: #1e3a8a !important;
+    --blockquote-text: #374151 !important;
+    --table-header-bg: #1e3a8a !important;
+    --table-even-row: #f8f9fc !important;
+    --table-hover-row: #ffffff !important;
+    --strong-color: #000000 !important;
+    --link-color: #1e3a8a !important;
+    
+    color-scheme: light !important;
+    background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app UI */
+  .editor,
+  .resize-divider,
+  .preview-header,
+  .download-btn,
+  .expand-btn,
+  .code-copy-btn {
+    display: none !important;
+  }
+
+  /* Expand preview to take full page */
+  body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  #root, .app, .main-content, .editor-preview-container, .preview {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+    width: 100% !important;
+  }
+
+  .preview-content {
+    font-size: 14.5px !important;
+    line-height: 1.65 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Prevent awkward page breaks and fix shadow artifacts */
+  pre, blockquote, .table-wrapper, img, .code-block-wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  h1, h2, h3, h4, h5 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+

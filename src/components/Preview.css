@@ -139,8 +139,8 @@
   overflow-x: hidden;
   line-height: 1.75;
   max-width: 100%;
-  font-size: 15px;
-  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text-secondary);
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -391,9 +391,9 @@
   margin: 18px 0;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #1e1e2e;
+  background-color: #0d1117;
   box-shadow: 0 4px 16px var(--shadow-medium), 0 1px 3px var(--shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid #30363d;
   transition: all 0.2s ease;
 }
 
@@ -407,9 +407,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  background-color: #252535;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
   position: relative;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
 }
 
 .code-window-controls {
@@ -475,8 +477,12 @@
   border-color: rgba(39, 201, 63, 0.4);
 }
 
-.code-block {
-  border-radius: 0 !important;
+.code-block,
+.code-block code {
+  border-bottom-left-radius: 11px !important;
+  border-bottom-right-radius: 11px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
   margin: 0 !important;
   font-size: 13.5px !important;
   line-height: 1.65 !important;
