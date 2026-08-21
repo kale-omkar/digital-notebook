@@ -22,16 +22,7 @@
   position: relative;
 }
 
-.preview-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--header-gradient);
-  opacity: 0.6;
-}
+/* Accent gradient line removed for minimalist style */
 
 .preview-header-left {
   display: flex;
@@ -66,25 +57,23 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  background: var(--header-gradient);
-  color: #fff;
+  background-color: var(--download-btn-bg);
+  color: var(--bg-primary); /* invert color for contrast */
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   letter-spacing: 0.3px;
 }
 
 .download-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  background-color: var(--download-btn-hover);
 }
 
 .download-btn:active {
-  transform: translateY(0);
+  opacity: 0.9;
 }
 
 .download-btn:disabled {
@@ -112,23 +101,21 @@
   height: 32px;
   padding: 0;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--bg-secondary);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .preview .header-icon-btn:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-  background-color: var(--accent-glow);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--shadow-light);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
 }
 
 .preview .header-icon-btn:active {
-  transform: translateY(0);
+  background-color: var(--bg-active);
 }
 
 /* ─── Preview Content Area ─── */
@@ -196,16 +183,14 @@
   gap: 3px;
   padding: 12px 14px;
   background-color: var(--bg-secondary);
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .placeholder-feature:hover {
-  border-color: var(--accent-color);
-  background-color: var(--accent-glow);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-light);
+  border-color: var(--border-hover);
+  background-color: var(--bg-hover);
 }
 
 .feature-icon {

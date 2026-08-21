@@ -22,17 +22,7 @@
   position: relative;
 }
 
-/* Accent gradient line under header */
-.editor-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--header-gradient);
-  opacity: 0.6;
-}
+/* Accent gradient line removed for minimalist style */
 
 .editor-header-left {
   display: flex;
@@ -80,23 +70,21 @@
   height: 32px;
   padding: 0;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--bg-secondary);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .header-icon-btn:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-  background-color: var(--accent-glow);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--shadow-light);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
 }
 
 .header-icon-btn:active {
-  transform: translateY(0);
+  background-color: var(--bg-active);
 }
 
 .theme-toggle-btn:hover {
@@ -121,7 +109,7 @@
   gap: 2px;
   padding: 2px;
   background-color: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .toolbar-divider {
@@ -153,14 +141,12 @@
 
 .toolbar-btn:hover {
   background-color: var(--bg-hover);
-  color: var(--accent-color);
+  color: var(--text-primary);
   border-color: var(--border-color);
-  transform: translateY(-1px);
 }
 
 .toolbar-btn:active {
   background-color: var(--bg-active);
-  transform: translateY(0);
 }
 
 /* ─── Textarea ─── */
@@ -208,8 +194,8 @@
   padding: 6px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px var(--shadow-heavy), 0 2px 8px var(--shadow-light);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--shadow-medium);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2px;
@@ -233,6 +219,6 @@
 }
 
 .code-dropdown-item:hover {
-  background-color: var(--accent-glow);
-  color: var(--accent-color);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
