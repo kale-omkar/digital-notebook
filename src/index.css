@@ -288,5 +288,18 @@ textarea {
     break-after: avoid;
     page-break-after: avoid;
   }
+
+  /* Preserve list indentation in PDF — browsers may strip padding in print */
+  .preview-content ul,
+  .preview-content ol {
+    padding-left: 20px !important;
+  }
+
+  .preview-content li > ul,
+  .preview-content li > ol {
+    padding-left: 28px !important;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
 }
 

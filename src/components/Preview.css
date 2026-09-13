@@ -307,21 +307,23 @@
 .preview-content ul,
 .preview-content ol {
   margin: 0 0 14px 0;
-  padding-left: 24px;
+  padding-left: 20px;
 }
 
 .preview-content li {
   margin-bottom: 5px;
-  padding-left: 4px;
+  padding-left: 2px;
   color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.7;
 }
 
+/* Nested lists: step in by a clear, larger amount */
 .preview-content li > ul,
 .preview-content li > ol {
   margin-top: 5px;
   margin-bottom: 5px;
+  padding-left: 28px;
 }
 
 .preview-content li li {
