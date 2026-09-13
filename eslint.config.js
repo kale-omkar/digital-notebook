@@ -6,7 +6,6 @@ import pluginReactRefresh from "eslint-plugin-react-refresh";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
-  { ignores: ["dist", "dist-ssr", "node_modules"] },
   js.configs.recommended,
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat["jsx-runtime"],
@@ -31,6 +30,11 @@ export default [
     },
     rules: {
       "react/prop-types": "off",
+      "no-unused-vars": ["warn", {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }],
       ...pluginReactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": [
         "warn",

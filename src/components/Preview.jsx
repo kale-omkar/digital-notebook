@@ -1,4 +1,4 @@
-import { useRef, useState, memo } from "react";
+import { useState, memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -7,7 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import "./Preview.css";
-import { MermaidDiagram, renderMermaidLight } from "./MermaidDiagram";
+import { MermaidDiagram } from "./MermaidDiagram";
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -86,9 +86,6 @@ function safeUrlTransform(url) {
 }
 
 function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
-  const previewRef = useRef(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
   const handleDownloadPDF = () => {
     // Reuse extractTitle to set the PDF title to the note's main heading
     const heading = extractTitle(content);
@@ -122,28 +119,17 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
         </div>
         <div className="preview-actions">
           <button
-            className={`download-btn ${isGenerating ? "generating" : ""}`}
+            className="download-btn"
             onClick={handleDownloadPDF}
-            disabled={!content || isGenerating}
+            disabled={!content}
             title="Download as PDF"
           >
-            {isGenerating ? (
-              <>
-                <svg className="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" strokeDasharray="60" strokeDashoffset="20" />
-                </svg>
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                PDF
-              </>
-            )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            PDF
           </button>
           <button
             className="header-icon-btn expand-btn"
@@ -168,7 +154,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
           </button>
         </div>
       </div>
-      <div className="preview-content" ref={previewRef}>
+      <div className="preview-content">
         {content ? (
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
@@ -184,7 +170,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                       localStorage.getItem("codestudynotes-images") || "{}"
                     );
                     finalSrc = storedImages[imgId] || src;
-                  } catch (e) {
+                  } catch (_e) {
                     // fallback to original src on error
                   }
                 }
@@ -193,7 +179,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
               pre({ children }) {
                 return <>{children}</>;
               },
-              code({ className, children, ...props }) {
+              code({ className, children, node: _node, ref: _ref, ...props }) {
                 const match = /language-(\w+)/.exec(className || "");
                 const codeString = String(children).replace(/\n$/, "");
 
@@ -227,7 +213,6 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                         wrapLines={true}
                         lineProps={{ className: 'code-line-row' }}
                         lineNumberStyle={{ minWidth: '2.5em', paddingRight: '1em' }}
-                        {...props}
                       >
                         {codeString}
                       </SyntaxHighlighter>
