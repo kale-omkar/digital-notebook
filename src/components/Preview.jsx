@@ -212,6 +212,9 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                         PreTag="div"
                         className="code-block"
                         showLineNumbers={true}
+                        wrapLines={true}
+                        lineProps={{ className: 'code-line-row' }}
+                        lineNumberStyle={{ minWidth: '2.5em', paddingRight: '1em' }}
                         {...props}
                       >
                         {codeString}

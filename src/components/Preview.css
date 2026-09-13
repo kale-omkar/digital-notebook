@@ -474,6 +474,16 @@
   background-color: transparent !important;
 }
 
+/* Live preview: allow horizontal scroll for long lines; never wrap */
+.preview-content .code-block {
+  overflow-x: auto !important;
+}
+.preview-content .code-block code {
+  white-space: pre !important;
+  display: block;
+}
+
+
 .preview-content li .code-block-wrapper {
   margin: 10px 0;
 }
@@ -614,5 +624,52 @@
   page-break-after: avoid;
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+/* ═══════════════════════════════════════════════════
+   PRINT / PDF — CODE BLOCK FIXES
+   wrapLines={true} + lineProps={{ className:'code-line-row' }} wraps each
+   line in a <span class="code-line-row">. In @media print we:
+   1. Override white-space to pre-wrap so long lines wrap
+   2. Apply hanging-indent only on .code-line-row spans (not token spans)
+      so continuation text aligns past the line-number gutter
+   ═══════════════════════════════════════════════════ */
+@media print {
+  /* Wrapper expands to full content height — no clipping, no scrollbar */
+  .preview-content .code-block-wrapper {
+    overflow: visible !important;
+  }
+
+  /* Hide only the copy button; keep the header (mac dots + lang label) */
+  .preview-content .code-block-header .code-copy-btn {
+    display: none !important;
+  }
+
+  /* Step 1: override the library's inline white-space:pre on <code>
+     so long lines wrap instead of being cut off */
+  .preview-content .code-block,
+  .preview-content .code-block code {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+  }
+
+  /* Step 2: hanging indent on each LINE ROW only (not token spans).
+     lineNumberStyle: minWidth:2.5em + paddingRight:1em = 3.5em gutter.
+     padding-left pushes continuation lines to 3.5em from left;
+     text-indent: -3.5em pulls first line (line number) back to left edge.
+     Result: wrapped continuations align under the code, not the number. */
+  .preview-content .code-block .code-line-row {
+    display: block;
+    padding-left: 3.5em;
+    text-indent: -3.5em;
+  }
+
+  /* Line-number span: keep it inline-block and prevent it from wrapping */
+  .preview-content .code-block .react-syntax-highlighter-line-number {
+    display: inline-block !important;
+    white-space: nowrap !important;
+  }
 }
 
