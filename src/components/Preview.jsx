@@ -90,6 +90,18 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleDownloadPDF = () => {
+    // Reuse extractTitle to set the PDF title to the note's main heading
+    const heading = extractTitle(content);
+    const originalTitle = document.title;
+    document.title = heading;
+
+    // Restore the tab title after the print dialog closes
+    const restore = () => {
+      document.title = originalTitle;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+
     window.print();
   };
 
