@@ -79,10 +79,37 @@ function extractTitle(content) {
 //   \[ ... \]  →  $$ ... $$  (block math)
 // remark-math only understands $ and $$ — this converts the common
 // LaTeX \( \) and \[ \] variants before the content reaches the parser.
+//
+// Code spans and fenced blocks are intentionally skipped so that
+// `\(x\)` written as inline code stays as raw text, not rendered math.
 function normalizeMath(content) {
   if (!content) return content;
-  return content
-    // \[ ... \] block math → $$ ... $$ (check longer delimiters first)
+
+  // Matches fenced code blocks (``` or ~~~~) and inline code (`...`)
+  // so we can leave them untouched.
+  const codePattern = /(`{3,}[\s\S]*?`{3,}|`[^`\n]+`)/g;
+
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codePattern.exec(content)) !== null) {
+    // Convert math in the non-code text before this code span/block
+    parts.push(applyLatexNorm(content.slice(lastIndex, match.index)));
+    // Preserve the code span/block exactly as-is
+    parts.push(match[0]);
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Convert math in any remaining non-code text after the last code span
+  parts.push(applyLatexNorm(content.slice(lastIndex)));
+
+  return parts.join('');
+}
+
+function applyLatexNorm(text) {
+  return text
+    // \[ ... \] block math → $$ ... $$ (longer delimiter first)
     .replace(/\\\[([^]*?)\\\]/g, (_m, math) => `$$${math}$$`)
     // \( ... \) inline math → $ ... $
     .replace(/\\\(([^]*?)\\\)/g, (_m, math) => `$${math}$`);
