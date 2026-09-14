@@ -85,8 +85,16 @@ function extractTitle(content) {
 function normalizeMath(content) {
   if (!content) return content;
 
-  // Matches fenced code blocks (``` or ~~~~) and inline code (`...`)
-  // so we can leave them untouched.
+  // Step 1 — AI antipattern: `\(...\)` or `\[...\]` (LaTeX wrapped in backticks).
+  // The AI sometimes wraps math in code backticks by mistake. Strip the backticks
+  // and convert to $...$ so the formula renders correctly as math.
+  content = content
+    .replace(/`\\\(([^`]*?)\\\)`/g, (_m, math) => `$${math}$`)
+    .replace(/`\\\[([^`]*?)\\\]`/g, (_m, math) => `$$${math}$$`);
+
+  // Step 2 — Bare \( ... \) and \[ ... \] outside code spans.
+  // Skip real code spans (fenced blocks and inline code) so that backtick-wrapped
+  // content that is genuinely code stays as literal text.
   const codePattern = /(`{3,}[\s\S]*?`{3,}|`[^`\n]+`)/g;
 
   const parts = [];
@@ -94,14 +102,10 @@ function normalizeMath(content) {
   let match;
 
   while ((match = codePattern.exec(content)) !== null) {
-    // Convert math in the non-code text before this code span/block
     parts.push(applyLatexNorm(content.slice(lastIndex, match.index)));
-    // Preserve the code span/block exactly as-is
     parts.push(match[0]);
     lastIndex = match.index + match[0].length;
   }
-
-  // Convert math in any remaining non-code text after the last code span
   parts.push(applyLatexNorm(content.slice(lastIndex)));
 
   return parts.join('');
