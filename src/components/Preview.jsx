@@ -73,6 +73,22 @@ function extractTitle(content) {
   );
 }
 
+// Normalize LaTeX math delimiters so notes render correctly regardless
+// of which notation the AI model uses:
+//   \( ... \)  →  $ ... $    (inline math)
+//   \[ ... \]  →  $$ ... $$  (block math)
+// remark-math only understands $ and $$ — this converts the common
+// LaTeX \( \) and \[ \] variants before the content reaches the parser.
+function normalizeMath(content) {
+  if (!content) return content;
+  return content
+    // \[ ... \] block math → $$ ... $$ (check longer delimiters first)
+    .replace(/\\\[([^]*?)\\\]/g, (_m, math) => `$$${math}$$`)
+    // \( ... \) inline math → $ ... $
+    .replace(/\\\(([^]*?)\\\)/g, (_m, math) => `$${math}$`);
+}
+
+
 function safeUrlTransform(url) {
   const allowedProtocols = ["http:", "https:", "mailto:", "tel:", "id:", "data:"];
   const protocolMatch = url.match(/^([a-z0-9.+-]+):/i);
@@ -259,7 +275,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
               },
             }}
           >
-            {content}
+            {normalizeMath(content)}
           </ReactMarkdown>
         ) : (
           <div className="preview-placeholder">
