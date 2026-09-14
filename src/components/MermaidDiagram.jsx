@@ -10,6 +10,12 @@ export function MermaidDiagram({ content, isDark }) {
     const renderDiagram = async () => {
       if (!containerRef.current) return;
 
+      // Guard: skip render entirely if content is empty or whitespace-only
+      if (!content || !content.trim()) {
+        containerRef.current.innerHTML = `<div class="mermaid-error">⚠ Empty diagram — no content to render.</div>`;
+        return;
+      }
+
       try {
         // Re-initialize mermaid whenever the theme changes
         const desiredTheme = isDark ? "dark" : "default";
@@ -22,7 +28,8 @@ export function MermaidDiagram({ content, isDark }) {
           currentTheme = desiredTheme;
         }
 
-        // Clear previous content safely
+        // Clear BEFORE render so Mermaid's own error SVG never gets a chance
+        // to settle into the DOM (which causes the bomb icon in PDFs)
         if (containerRef.current) {
           containerRef.current.innerHTML = "";
         }
@@ -44,10 +51,14 @@ export function MermaidDiagram({ content, isDark }) {
         }
       } catch (error) {
         console.error("Mermaid rendering error:", error);
-        const errorMsg = error.message || String(error);
-        // Only set error if container still exists
+        // Replace any partial/error SVG Mermaid may have injected with a
+        // clean text message — this is what prints in PDF instead of the bomb
         if (containerRef.current) {
-          containerRef.current.innerHTML = `<div class="mermaid-error"><strong>⚠ Diagram Error</strong>\n\n${errorMsg}\n\n<span style="opacity:0.7">Tip: Check your mermaid syntax. Common issues:\n• Missing quotes around labels with special chars\n• Incorrect arrow syntax (use --> not ->)\n• Unclosed brackets or braces</span></div>`;
+          containerRef.current.innerHTML =
+            `<div class="mermaid-error">` +
+            `<strong>⚠ Diagram syntax error</strong><br/>` +
+            `<code style="font-size:0.8em;opacity:0.7">${(error.message || String(error)).split('\n')[0]}</code>` +
+            `</div>`;
         }
       }
     };
