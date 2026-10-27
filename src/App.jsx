@@ -43,6 +43,10 @@ function App() {
     "codestudynotes-darkmode",
     false,
   );
+  const [codeBlockDarkMode, setCodeBlockDarkMode] = useLocalStorage(
+    "codestudynotes-codeblock-darkmode",
+    true,
+  );
   const [expandedPanel, setExpandedPanel] = useState(null);
   const [splitPercent, setSplitPercent] = useState(50);
   const containerRef = useRef(null);
@@ -58,6 +62,11 @@ function App() {
   const toggleDarkMode = useCallback(
     () => setDarkMode((d) => !d),
     [setDarkMode],
+  );
+
+  const toggleCodeBlockDarkMode = useCallback(
+    () => setCodeBlockDarkMode((d) => !d),
+    [setCodeBlockDarkMode],
   );
 
   const toggleExpand = useCallback((panel) => {
@@ -122,6 +131,8 @@ function App() {
                 expanded={expandedPanel === "preview"}
                 onToggleExpand={() => toggleExpand("preview")}
                 darkMode={darkMode}
+                codeBlockDarkMode={codeBlockDarkMode}
+                onToggleCodeBlockDarkMode={toggleCodeBlockDarkMode}
                 style={
                   showBothPanels
                     ? { flex: `0 0 ${100 - splitPercent}%` }

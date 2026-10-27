@@ -4,7 +4,10 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  oneDark,
+  prism as oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import "./Preview.css";
 import { MermaidDiagram } from "./MermaidDiagram";
@@ -132,7 +135,15 @@ function safeUrlTransform(url) {
   return url;
 }
 
-function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
+function Preview({
+  content,
+  expanded,
+  onToggleExpand,
+  darkMode,
+  codeBlockDarkMode,
+  onToggleCodeBlockDarkMode,
+  style,
+}) {
   const handleDownloadPDF = () => {
     // Reuse extractTitle to set the PDF title to the note's main heading
     const heading = extractTitle(content);
@@ -177,6 +188,31 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             PDF
+          </button>
+          <button
+            className="header-icon-btn code-theme-toggle-btn"
+            onClick={onToggleCodeBlockDarkMode}
+            title={
+              codeBlockDarkMode
+                ? "Switch code blocks to light mode"
+                : "Switch code blocks to dark mode"
+            }
+            aria-label={
+              codeBlockDarkMode
+                ? "Switch code blocks to light mode"
+                : "Switch code blocks to dark mode"
+            }
+          >
+            {codeBlockDarkMode ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
           </button>
           <button
             className="header-icon-btn expand-btn"
@@ -241,7 +277,11 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                 if (match || codeString.includes("\n")) {
                   const lang = match ? match[1] : "text";
                   return (
-                    <div className="code-block-wrapper">
+                    <div
+                      className={`code-block-wrapper ${
+                        codeBlockDarkMode ? "code-block-dark" : "code-block-light"
+                      }`}
+                    >
                       <div className="code-block-header">
                         <div className="code-window-controls">
                           <span className="mac-dot mac-close"></span>
@@ -252,7 +292,7 @@ function Preview({ content, expanded, onToggleExpand, darkMode, style }) {
                         <CopyButton text={codeString} />
                       </div>
                       <SyntaxHighlighter
-                        style={oneDark}
+                        style={codeBlockDarkMode ? oneDark : oneLight}
                         language={lang}
                         PreTag="div"
                         className="code-block"

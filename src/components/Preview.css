@@ -388,6 +388,31 @@
   transition: all 0.2s ease;
 }
 
+.code-block-wrapper.code-block-light {
+  background-color: #f5f7fa;
+  border-color: #d7dce3;
+}
+
+.code-block-wrapper.code-block-light .code-block-header {
+  background-color: #e8ecf1;
+  border-bottom-color: #d7dce3;
+}
+
+.code-block-wrapper.code-block-light .code-block-lang {
+  color: #4b5563;
+}
+
+.code-block-wrapper.code-block-light .code-copy-btn {
+  color: #4b5563;
+  border-color: #b8c0cc;
+}
+
+.code-block-wrapper.code-block-light .code-copy-btn:hover {
+  background: rgba(148, 163, 184, 0.25);
+  color: #111827;
+  border-color: #94a3b8;
+}
+
 .code-block-wrapper:hover {
   box-shadow: 0 8px 24px var(--shadow-heavy), 0 2px 6px var(--shadow-medium);
   transform: translateY(-1px);
@@ -678,4 +703,3 @@
     white-space: nowrap !important;
   }
 }
-
