@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useMemo } from "react";
+import { useRef, useEffect, useCallback, useMemo, useState } from "react";
 import "./Editor.css";
 
 /* ─── Inline SVG Icons ─── */
@@ -96,6 +96,19 @@ const icons = {
       <circle cx="16" cy="12" r="1" fill="currentColor" />
     </svg>
   ),
+  tree: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="3" r="2" />
+      <circle cx="6" cy="12" r="2" />
+      <circle cx="18" cy="12" r="2" />
+      <circle cx="3" cy="21" r="2" />
+      <circle cx="12" cy="21" r="2" />
+      <line x1="12" y1="5" x2="7" y2="10" />
+      <line x1="12" y1="5" x2="17" y2="10" />
+      <line x1="6" y1="14" x2="4" y2="19" />
+      <line x1="6" y1="14" x2="11" y2="19" />
+    </svg>
+  ),
   sun: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="5" />
@@ -144,6 +157,8 @@ function Editor({
   const textareaRef = useRef(null);
   const contentRef = useRef(content);
   const onChangeRef = useRef(onChange);
+  const dragCounterRef = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     contentRef.current = content;
@@ -372,6 +387,25 @@ function Editor({
     }, 0);
   }, [onChange]);
 
+  const insertTree = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const currentContent = contentRef.current;
+    const treeBlock =
+      "\n```tree\nRoot\n  Child A\n    Grandchild 1\n    Grandchild 2\n  Child B\n    Grandchild 3\n```\n";
+    const newText =
+      currentContent.substring(0, start) +
+      treeBlock +
+      currentContent.substring(start);
+    onChange(newText);
+    setTimeout(() => {
+      textarea.focus();
+      const rootPos = start + "\n```tree\n".length;
+      textarea.setSelectionRange(rootPos, rootPos + "Root".length);
+    }, 0);
+  }, [onChange]);
+
   // Keyboard shortcuts — uses refs to avoid stale closures
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -520,6 +554,38 @@ function Editor({
     [compressAndInsertImage],
   );
 
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current = 0;
+      setIsDragging(false);
+
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) return;
+
+      compressAndInsertImage(file);
+    },
+    [compressAndInsertImage]
+  );
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDragEnter = useCallback((e) => {
+    e.preventDefault();
+    dragCounterRef.current += 1;
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current === 0) setIsDragging(false);
+  }, []);
+
   const stats = useMemo(() => {
     if (!content) return { words: 0, chars: 0 };
     const words = content.trim().split(/\s+/).filter(Boolean).length;
@@ -528,8 +594,12 @@ function Editor({
 
   return (
     <div
-      className={`editor ${expanded ? "editor-expanded" : ""}`}
+      className={`editor ${expanded ? "editor-expanded" : ""} ${isDragging ? "editor-drag-over" : ""}`}
       style={style}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div className="editor-header">
         <div className="editor-header-left">
@@ -669,6 +739,13 @@ function Editor({
             title="Horizontal Rule"
           >
             {icons.hr}
+          </button>
+          <button
+            className="toolbar-btn"
+            onClick={insertTree}
+            title="Tree Diagram (`	ree)"
+          >
+            {icons.tree}
           </button>
         </div>
       </div>

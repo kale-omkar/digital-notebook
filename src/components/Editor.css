@@ -1,3 +1,10 @@
+﻿
+/* --- Drag and Drop --- */
+.editor-drag-over {
+  outline: 2px dashed var(--accent-color, #6c9fff);
+  outline-offset: -3px;
+  background-color: rgba(108, 159, 255, 0.05);
+}
 .editor {
   flex: 1;
   display: flex;
